@@ -143,8 +143,8 @@ def importTexturesToMaterial(RSMaterial, tex_tuples, material_arguments):
 
         elif channel_name in translucency_channel:
             tex_node_translucency = RSMaterial.AddTexture(filename, filepath, 'RS_INPUT_COLORSPACE_RAW')
-            RSMaterial.AddConnection(tex_node_translucency, rsID.StrPortID("texturesampler", "outcolor"), standard_surface, rsID.PortStr.ms_color)
-            RSMaterial.SetShaderValue(standard_surface, rsID.PortStr.ms_amount, 1.0)
+            RSMaterial.AddConnection(tex_node_translucency, rsID.StrPortID("texturesampler", "outcolor"), standard_surface, rsID.PortStr.sss_color)
+            RSMaterial.SetShaderValue(standard_surface, rsID.PortStr.sss_weight, 1.0)
             RSMaterial.SetShaderValue(standard_surface, _RS_NODE_PREFIX+"standardmaterial.refr_thin_walled", True)
             print("Texture " + filename + " exists and has been imported.")
 
