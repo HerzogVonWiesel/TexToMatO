@@ -32,3 +32,7 @@ TexToMatO has two modes: Either you can import all textures inside a folder to c
 * `Miscellaneous`
   * `Use Sprite node for opacity` : You can decide whether the opacity texture gets plugged into the Standard Material's opacity channel or whether it should be used as a sprite node (more efficient, but only binary opacity).
 
+
+
+https://github.com/HerzogVonWiesel/TexToMatO/assets/58423784/97296862-e080-4ad1-b7c0-f7dbe042e90b
+
