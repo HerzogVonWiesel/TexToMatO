@@ -219,7 +219,7 @@ def importTexturesFromBase(derive_folder_from_base = False, delete_base_texture 
 
             if base_color_tex is None:
                 c4d.gui.MessageDialog("No base texture found in Material %s" % RSMaterial.GetMaterialName(), c4d.GEMB_ICONEXCLAMATION)
-                return
+                continue
 
             texture_path = base_color_tex.GetInputs().FindChild(_RS_NODE_PREFIX+"texturesampler.tex0").FindChild('path').GetDefaultValue()
             texture_path = str(texture_path)
@@ -243,7 +243,7 @@ def importTexturesFromBase(derive_folder_from_base = False, delete_base_texture 
                 print(f"Prefix: {texture_name_without_channel} | Found in: {channel_name}")
             else:
                 c4d.gui.MessageDialog("No regex match in base texture found in Material %s" % RSMaterial.GetMaterialName(), c4d.GEMB_ICONEXCLAMATION)
-                return
+                continue
             
             if delete_base_texture:
                 RSMaterial.RemoveShader(base_color_tex)
