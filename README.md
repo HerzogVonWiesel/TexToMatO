@@ -6,14 +6,12 @@
 * It depends on the [Redshift Material API](https://github.com/HerzogVonWiesel/Custom_Redshift_API) to work.
 
 ### Installation
-* Install the Redshift Material API if you haven't already.
-    * Copy redshift_ID.py and redshift_node.py into the Cinema 4D python library folder.
-        - Windows: `C:\Users\USERNAME\AppData\Roaming\MAXON\CINEMA 4D VERSION\python310\libs\`
-        - Mac: `/Users/USERNAME/Library/Preferences/MAXON/CINEMA 4D VERSION/python310/libs/`
-* Copy TexToMatO into the scripts folder of Cinema 4D.
-    * Extensions -> User Scripts -> Open script folder
-* You can then open TexToMatO by going to Extensions -> User Scripts -> User Scripts -> TexToMatO
-    * You can add a shortcut to open TexToMatO in your layout for easier access.
+* Unzip TexToMatO into your plugins folder of Cinema 4D. (below are examples)
+     - Windows: `C:\Users\USERNAME\AppData\Roaming\MAXON\CINEMA 4D VERSION\plugins\`
+     - Mac: `/Users/USERNAME/Library/Preferences/MAXON/CINEMA 4D VERSION/plugins/`
+* Make sure there is no TexToMatO folder inside of the plugins/TexToMatO folder
+* You can then open TexToMatO by going to Extensions -> TexToMatO
+    * You can add a shortcut to open TexToMatO in your layout for easier access!
 
 ### Features
 TexToMatO has two modes: Either you can import all textures inside a folder to create new materials for each set from scratch, or you can import missing textures in selected materials (which often occur after importing .fbx files for example).
@@ -22,6 +20,7 @@ TexToMatO has two modes: Either you can import all textures inside a folder to c
 * `Import textures from base in material` : Searches for an already existing texture in the selected materials and finds the missing ones from the texture folder
   * `Derive texture folder from base` : If OFF, you can specify which folder to read the textures from instead of automatically deriving it from the base texture in the material
   * `Delete base texture in material`: Deletes the already existing texture in the material to not end up with duplicate texture nodes.
+  * `Rename material based on texture`: Renames the material to the base texture's base name.
 ---
 * `Normal options`
   * `Flip Y` : Toggles the option to flip the Y channel of the normal. This is useful when working with DirectX vs. OpenGL normal maps.
