@@ -1,5 +1,6 @@
 # Tex🍅 (TexToMatO)
 ## TexToMatO - A powerful texture to material converter for Cinema 4D
+![image](https://github.com/HerzogVonWiesel/TexToMatO/assets/58423784/7303c021-015a-4197-9c7d-96a89791ab4d)
 
 ### Important Notes
 * This script is intended to create & modify Redshift materials in Cinema 4D using the node system.
