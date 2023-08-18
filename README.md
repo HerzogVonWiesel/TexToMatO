@@ -30,7 +30,25 @@ TexToMatO has two modes: Either you can import all textures inside a folder to c
 ---
 * `Miscellaneous`
   * `Use Sprite node for opacity` : You can decide whether the opacity texture gets plugged into the Standard Material's opacity channel or whether it should be used as a sprite node (more efficient, but only binary opacity).
+  * `Use case-insensitive regex` (be careful not to match too much with that though)
+---
+* Regex options
+  *Use custom regex: Manage your own custom, additional regex you can add for your version of the plugin: maybe you have some interesting channel names in your studio?
+---
+* Preferences
+  * Automatically add Color Correct nodes to color textures (Albedo & Translucency)
+  * Automatically add Triplanar nodes to all textures
+  * Whether to connect AO to overall tint or multiplying it with Albedo in a color layer
+---
+* Additional Features
+  * All texture nodes can be managed at once with SCALE, OFFSET and ROTATION nodes added to the graph
+  * Submit Bugs and Feedback easily with a form
+  * Once you import one or more textures, all settings are saved and are there for you when you need them (well, and restart C4D)
+  * No worries, you can easily reset them to default in the preferences menu should you want to!
+---
+Have fun and keep on creating!
 
+- Jérôme
 
 
 https://github.com/HerzogVonWiesel/TexToMatO/assets/58423784/97296862-e080-4ad1-b7c0-f7dbe042e90b
