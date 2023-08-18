@@ -1,0 +1,14 @@
+{
+    "image_extensions": [],
+    "color_channel": [],
+    "normal_channel": [],
+    "ao_channel": [],
+    "metalness_channel": [],
+    "roughness_channel": [],
+    "specular_channel": [],
+    "glossiness_channel": [],
+    "opacity_channel": [],
+    "translucency_channel": [],
+    "displacement_channel": [],
+    "misc_channel": []
+}

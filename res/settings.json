@@ -1,0 +1,20 @@
+{
+    "addCC": true,
+    "addTriplanar": false,
+    "aoOverallTint": true,
+    "bumpFlipY": false,
+    "bumpLegacy": false,
+    "spriteOpacity": true,
+    "caseInsensitive": false,
+    "customRegex": true,
+    "texFolder": "",
+    "multiTex": {
+        "BASE": " ",
+        "R": " ",
+        "G": " ",
+        "B": " "
+    },
+    "derive_folder_from_base": true,
+    "delete_base_texture": true,
+    "rename_materials_from_base": false
+}
