@@ -58,7 +58,7 @@ class ShaderStr():
     WireFrame = RS_SHADER_PREFIX + "wireframe" # Wire Frame
     # Utility
     OSLShader = RS_SHADER_PREFIX + "osl" # OSL
-    Triplanar = RS_SHADER_PREFIX + "triplanar" # Triplanar
+    Triplanar = RS_SHADER_PREFIX + "triplanar" # Triplanar ['sameimageoneachaxis', 'imagex', 'imagey', 'imagez', 'blendamount', 'blendcurve', 'scale', 'offset', 'rotation', 'projspacetype', 'islefthanded', 'yisup']
     UVProjection = RS_SHADER_PREFIX + "uvprojection" # UV Projection
     StoreColorToAOV = RS_SHADER_PREFIX + "storecolortoaov" # Store Color To AOV
     RaySwitch = RS_SHADER_PREFIX + "rayswitch" # Ray Switch

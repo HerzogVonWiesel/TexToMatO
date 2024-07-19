@@ -1,6 +1,7 @@
 {
     "addCC": true,
     "addTriplanar": false,
+    "addScaleRotOff": true,
     "aoOverallTint": true,
     "bumpFlipY": false,
     "bumpLegacy": false,

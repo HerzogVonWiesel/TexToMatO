@@ -506,12 +506,13 @@ class RedshiftNodeMaterial:
         Returns the Redshift Output node.
         """
         if self.graph is None:
+            print("NO GRAPH DOUNS")
             return None
         try:
             endNodePath = self.nimbusRef.GetPath(maxon.NIMBUS_PATH.MATERIALENDNODE)
             shader = self.graph.GetNode(endNodePath)
             return shader
-        finally:
+        except:
             for shader in self.GetShaders(False):
                 if self.GetAssetId(shader) == OutputMaterialAssetID:
                     return shader
@@ -525,6 +526,7 @@ class RedshiftNodeMaterial:
             return None
 
         endNode = self.GetRSOutput()
+        print("endNode : " + str(endNode))
         if endNode is None:
             print("[Error] End node is not found in Node Material: %s" % self.material.GetName())
             return None

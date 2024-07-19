@@ -9,6 +9,7 @@ import os
 import sys
 import maxon
 import glob
+import errno
 import re
 import json
 from ctypes import pythonapi, c_int, py_object
@@ -72,13 +73,13 @@ def init_channels(custom_regex_dict, case_insensitive = False):
 
     channels_dict = {
         "image_extensions":         ["png", "jpeg", "jpg", "dds", "tga", "tif", "tiff", "bmp", "exr"],
-        "color_channel":            ["Base_Color", "BaseColor", "basecolor", "color", "COL", "Color", "Albedo", "col", "Base", "diff", "_D-", "_D."],
+        "color_channel":            ["Base_Color", "BaseColor", "basecolor", "color", "COL", "Color", "Albedo", "albedo", "col", "Base", "diff", "_D-", "_D."],
         "normal_channel":           ["Normal_OpenGL", "normal", "NRM", "Normal", "nml", "nrml", "Norm", "_N.", "_N("],
         "ao_channel":               ["Mixed_AO", "ao", "AO"],
         "metalness_channel":        ["Metallic", "Meta", "_M.", "_metal."],
         "roughness_channel":        ["Roughness", "roughness", "Roug", "_R.", "_rough."],
         "specular_channel":         ["Specular", "specular", "_S."],
-        "glossiness_channel":       ["GLOSS", "glossiness"],
+        "glossiness_channel":       ["GLOSS", "glossiness", "gloss"],
         "opacity_channel":          ["opacity", "alpha", "opac", "_O.", "Opacity"],
         "translucency_channel":     ["_L.", "_L_", "Translucency", "Transmission"],
         "displacement_channel":     ["height", "DISP", "Displacement", "depth"],
@@ -129,9 +130,10 @@ def processTextureToMaterial(RSMaterial, texture_node, connect_node, channel_por
         rotation_node = "rsmathabsvector"
         texture_node = triplanar_node
 
-    RSMaterial.AddConnection(scale_node, rsID.StrPortID("rsmathabsvector", "out"), texture_node, rsID.StrPortID(texture_id, "scale"))
-    RSMaterial.AddConnection(trans_node, rsID.StrPortID("rsmathabsvector", "out"), texture_node, rsID.StrPortID(texture_id, "offset"))
-    RSMaterial.AddConnection(rot_node, rsID.StrPortID(rotation_node, "out"), texture_node, rsID.StrPortID(texture_id, rotation_port))
+    if material_arguments["addScaleRotOff"]:
+        RSMaterial.AddConnection(scale_node, rsID.StrPortID("rsmathabsvector", "out"), texture_node, rsID.StrPortID(texture_id, "scale"))
+        RSMaterial.AddConnection(trans_node, rsID.StrPortID("rsmathabsvector", "out"), texture_node, rsID.StrPortID(texture_id, "offset"))
+        RSMaterial.AddConnection(rot_node, rsID.StrPortID(rotation_node, "out"), texture_node, rsID.StrPortID(texture_id, rotation_port))
 
     RSMaterial.AddConnection(texture_node, rsID.StrPortID(texture_id, "outcolor"), connect_node, channel_port)
     return texture_node
@@ -149,17 +151,22 @@ def importTexturesToMaterial(RSMaterial, tex_tuples, material_arguments):
         albedo_connectport = (color_layer, rsID.StrPortID("rscolorlayer", "base_color"))
         ao_connectport = (color_layer, rsID.StrPortID("rscolorlayer", "layer1_color"))
 
-    translate = RSMaterial.AddShader("rsmathabsvector")
-    RSMaterial.SetShaderName(translate, "OFFSET")
-    scale = RSMaterial.AddShader("rsmathabsvector")
-    RSMaterial.SetShaderName(scale, "SCALE")
-    RSMaterial.SetShaderValue(scale, _RS_NODE_PREFIX+"rsmathabsvector.input", maxon.Vector(1, 1, 1))
-    if material_arguments["addTriplanar"]:
-        RSMaterial.SetShaderValue(scale, _RS_NODE_PREFIX+"rsmathabsvector.input", maxon.Vector(.01, .01, .01))
-        rotate = RSMaterial.AddShader("rsmathabsvector")
-    else:
-        rotate = RSMaterial.AddShader("rsmathabs")
-    RSMaterial.SetShaderName(rotate, "ROTATE")
+    
+    scale = None
+    translate = None
+    rotate = None
+    if material_arguments["addScaleRotOff"]:
+        translate = RSMaterial.AddShader("rsmathabsvector")
+        RSMaterial.SetShaderName(translate, "OFFSET")
+        scale = RSMaterial.AddShader("rsmathabsvector")
+        RSMaterial.SetShaderName(scale, "SCALE")
+        RSMaterial.SetShaderValue(scale, _RS_NODE_PREFIX+"rsmathabsvector.input", maxon.Vector(1, 1, 1))
+        if material_arguments["addTriplanar"]:
+            RSMaterial.SetShaderValue(scale, _RS_NODE_PREFIX+"rsmathabsvector.input", maxon.Vector(.01, .01, .01))
+            rotate = RSMaterial.AddShader("rsmathabsvector")
+        else:
+            rotate = RSMaterial.AddShader("rsmathabs")
+        RSMaterial.SetShaderName(rotate, "ROTATE")
     # print(scale.GetInputs().FindChild(_RS_NODE_PREFIX+"rsmathabsvector.input").GetDefaultValue().GetType())
 
     mat_tex_dict = {
@@ -201,7 +208,7 @@ def importTexturesToMaterial(RSMaterial, tex_tuples, material_arguments):
 
         elif channel_name in specular_channel:
             tex_node_specular = RSMaterial.AddTexture(filename, filepath, 'RS_INPUT_COLORSPACE_RAW')
-            mat_tex_dict["Specular"] = processTextureToMaterial(RSMaterial, tex_node_specular, standard_surface, rsID.PortStr.refl_roughness, *processArgs)
+            mat_tex_dict["Specular"] = processTextureToMaterial(RSMaterial, tex_node_specular, standard_surface, rsID.PortStr.refl_color, *processArgs)
 
         elif channel_name in normal_channel:
             tex_node_normal = RSMaterial.AddTexture(filename, filepath, 'RS_INPUT_COLORSPACE_RAW')
@@ -419,14 +426,15 @@ def importTexturesFromFolder(material_arguments):
     doc.EndUndo()
     return
 
+
 ##########################################################################
 ##                                                                      ##
 ##                                UI                                    ##
 ##                                                                      ##
 ##########################################################################
 
-VERSION_NUMBER = "v4.0"
-ABOUT_TEXT_COPYRIGHT = "©2023 by Jérôme Stephan. All rights reserved."
+VERSION_NUMBER = "v4.2"
+ABOUT_TEXT_COPYRIGHT = "©2024 by Jérôme Stephan. All rights reserved."
 ABOUT_TEXT_GITHUB = "https://github.com/HerzogVonWiesel"
 ABOUT_TEXT_WEBSITE = "https://jeromestephan.de"
 ABOUT_LINK_README = "https://jeromestephan.gumroad.com/l/TexToMatO?layout=profile"
@@ -499,8 +507,9 @@ ID_PREFS_NOTIF = 13003
 ID_PREFS_RESET_DEFAULTS = 13004
 ID_PREFS_RESET_FINISHED = 13005
 ID_PREFS_ADD_CC = 13006
-ID_PREFS_ADD_TRIPLANAR = 13007
-ID_PREFS_AO_OVERALL_TINT = 13008
+ID_PREFS_ADD_SCALEROTOFF = 13007
+ID_PREFS_ADD_TRIPLANAR = 13008
+ID_PREFS_AO_OVERALL_TINT = 13009
 
 ID_BLANK = 101010
 #endregion IDs
@@ -528,19 +537,35 @@ class AboutDialog(c4d.gui.GeDialog):
         return True
 
 class SettingsDialog(c4d.gui.SubDialog):
-    # parentID = parentID
     settings_dict = {}
     def UpdateSettings(self):
         self.settings_dict["addCC"] = self.GetBool(ID_PREFS_ADD_CC)
         self.settings_dict["addTriplanar"] = self.GetBool(ID_PREFS_ADD_TRIPLANAR)
+        self.settings_dict["addScaleRotOff"] = self.GetBool(ID_PREFS_ADD_SCALEROTOFF)
         self.settings_dict["aoOverallTint"] = self.GetBool(ID_PREFS_AO_OVERALL_TINT)
-        with open(_path_ + "/settings.json", "w") as write_file:
-            json.dump(self.settings_dict, write_file, indent=4)
-        self.SetString(ID_PREFS_NOTIF, "Preferences updated!")
-        return True
+        # Creates the directory if it does not exist
+        userDir = os.path.dirname(_path_ + "/user/settings.json")
+        try:
+            os.makedirs(userDir)
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(userDir):
+                pass
+            else:
+                print(e)
+                raise
+        try:
+            with open(_path_ + "/user/settings.json", "w") as write_file:
+                json.dump(self.settings_dict, write_file, indent=4)
+            self.SetString(ID_PREFS_NOTIF, "Preferences updated!")
+            return True
+        except IOError as e:
+            print(e)
+            self.SetString(ID_PREFS_NOTIF, "Error updating preferences, check folder permissions! " + str(e))
+            return False
+        
     
     def ReadSettings(self):
-        self.settings_dict = ReadJSON("/settings.json", "/res/settings.json")
+        self.settings_dict = ReadJSON("/user/settings.json", "/res/settings.json")
     
     def CreateLayout(self):
         self.SetTitle("Manage your preferences")
@@ -549,13 +574,14 @@ class SettingsDialog(c4d.gui.SubDialog):
         self.GroupBorder(c4d.BORDER_GROUP_IN)
         self.GroupBorderSpace(GROUP_BORDER_SPACE, GROUP_BORDER_SPACE_SM, GROUP_BORDER_SPACE, GROUP_BORDER_SPACE)
         self.AddCheckbox(ID_PREFS_ADD_CC, c4d.BFH_SCALEFIT, 0, 0, "Add Color Correct node to color textures")
+        self.AddCheckbox(ID_PREFS_ADD_SCALEROTOFF, c4d.BFH_SCALEFIT, 0, 0, "Add Scale, Rotation and Offset nodes to textures")
         self.AddCheckbox(ID_PREFS_ADD_TRIPLANAR, c4d.BFH_SCALEFIT, 0, 0, "Add Triplanar node to textures")
         self.AddCheckbox(ID_PREFS_AO_OVERALL_TINT, c4d.BFH_SCALEFIT, 0, 0, "Connect AO to overall tint instead of albedo")
         self.GroupEnd()
         
         self.AddSeparatorH(c4d.BFH_SCALEFIT)
         self.AddButton(ID_PREFS_UPDATE, c4d.BFH_SCALEFIT, 0, 30, "Update your preferences!")
-        self.AddStaticText(ID_PREFS_NOTIF, c4d.BFH_CENTER, 0, 0, "                                         ")
+        self.AddStaticText(ID_PREFS_NOTIF, c4d.BFH_CENTER, 0, 0, "                                                                                               ")
         self.AddSeparatorH(c4d.BFH_SCALEFIT | c4d.BFV_BOTTOM)
         self.AddButton(ID_PREFS_RESET_DEFAULTS, c4d.BFH_SCALEFIT | c4d.BFV_BOTTOM, 0, 0, "Reset all to defaults")
         self.GroupEnd()
@@ -565,6 +591,7 @@ class SettingsDialog(c4d.gui.SubDialog):
         self.ReadSettings()
         self.SetBool(ID_PREFS_ADD_CC, self.settings_dict["addCC"])
         self.SetBool(ID_PREFS_ADD_TRIPLANAR, self.settings_dict["addTriplanar"])
+        self.SetBool(ID_PREFS_ADD_SCALEROTOFF, self.settings_dict["addScaleRotOff"])
         self.SetBool(ID_PREFS_AO_OVERALL_TINT, self.settings_dict["aoOverallTint"])
         return True
     
@@ -596,13 +623,28 @@ class RegexDialog(c4d.gui.GeDialog):
         self.regex_dict["translucency_channel"] = [value for value in self.GetString(ID_REGEX_TRANSLUCENCY).split(",") if value != ""]
         self.regex_dict["displacement_channel"] = [value for value in self.GetString(ID_REGEX_DISPLACEMENT).split(",") if value != ""]
         self.regex_dict["misc_channel"] = [value for value in self.GetString(ID_REGEX_MISC).split(",") if value != ""]
-        with open(_path_ + "/custom_regex.json", "w") as write_file:
-            json.dump(self.regex_dict, write_file, indent=4)
-        self.SetString(ID_REGEX_NOTIF, "Regex updated!")
-        return True
+        # Creates the directory if it does not exist
+        userDir = os.path.dirname(_path_ + "/user/custom_regex.json")
+        try:
+            os.makedirs(userDir)
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(userDir):
+                pass
+            else:
+                print(e)
+                raise
+        try:
+            with open(_path_ + "/user/custom_regex.json", "w") as write_file:
+                json.dump(self.regex_dict, write_file, indent=4)
+            self.SetString(ID_REGEX_NOTIF, "Preferences updated!")
+            return True
+        except IOError as e:
+            print(e)
+            self.SetString(ID_REGEX_NOTIF, "Error updating Regex, check folder permissions! " + str(e))
+            return False
     
     def CreateLayout(self):
-        self.regex_dict = ReadJSON("/custom_regex.json", "/res/custom_regex.json")
+        self.regex_dict = ReadJSON("/user/custom_regex.json", "/res/custom_regex.json")
         self.SetTitle("Manage your custom regex")
         self.GroupBegin(ID_BLANK, c4d.BFH_SCALEFIT, title="OUTER GROUP", cols=1)
         self.AddStaticText(ID_BLANK, c4d.BFH_FIT, 0, 0, "Make sure to separate your regex with a comma, no space (except you want to match it!)")
@@ -842,6 +884,7 @@ class MainDialog(c4d.gui.GeDialog):
 
                 "addCC":            self.settings_dict["addCC"],
                 "addTriplanar":     self.settings_dict["addTriplanar"],
+                "addScaleRotOff":     self.settings_dict["addScaleRotOff"],
                 "aoOverallTint":    self.settings_dict["aoOverallTint"],
             }
             importFromBase_args = {
@@ -888,6 +931,12 @@ class MainDialog(c4d.gui.GeDialog):
             else:
                 self.Enable(ID_FOLDER_SELECT_TEXT, True)
                 self.Enable(ID_FOLDER_SELECT_BUTTON, True)
+
+        # elif mid == ID_PREFS_ADD_SCALEROTOFF:
+        #     if self.GetBool(ID_PREFS_ADD_SCALEROTOFF):
+        #         self.Enable(ID_PREFS_ADD_TRIPLANAR, True)
+        #     else:
+        #         self.Enable(ID_PREFS_ADD_TRIPLANAR, False)
 
         elif mid == ID_REGEX_MANAGE:
             regex_dlg = RegexDialog()
