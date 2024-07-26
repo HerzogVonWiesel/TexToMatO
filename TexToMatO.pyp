@@ -307,7 +307,7 @@ def importTexturesFromBase(derive_folder_from_base = False, delete_base_texture 
 
     custom_regex_dict = None
     if material_arguments["customRegex"]:
-        custom_regex_dict = ReadJSON("/custom_regex.json", "/res/custom_regex.json")
+        custom_regex_dict = ReadJSON("/user/custom_regex.json", "/res/custom_regex.json")
     init_channels(custom_regex_dict, material_arguments["caseInsensitive"])
     base_texture_regex = r'^(.*?)(' + channels_regex + ')(.*?)(?:' + '|'.join(image_extensions) + ')\\b'
 
@@ -392,7 +392,7 @@ def importTexturesFromFolder(material_arguments):
 
     custom_regex_dict = None
     if material_arguments["customRegex"]:
-        custom_regex_dict = ReadJSON("/custom_regex.json", "/res/custom_regex.json")
+        custom_regex_dict = ReadJSON("/user/custom_regex.json", "/res/custom_regex.json")
     init_channels(custom_regex_dict, material_arguments["caseInsensitive"])
     texture_regex = r'^(.*?)(' + channels_regex + ')(.*?)(?:' + '|'.join(image_extensions) + ')\\b'
 
@@ -723,17 +723,17 @@ class RegexDialog(c4d.gui.GeDialog):
 class MainDialog(c4d.gui.GeDialog):
     settings_dict = {}
     def ReadSettings(self):
-        self.settings_dict = ReadJSON("/settings.json", "/res/settings.json")
+        self.settings_dict = ReadJSON("/user/settings.json", "/res/settings.json")
     def UpdateSettings(self, texArguments, importFromBase_args):
         for key, value in texArguments.items():
             self.settings_dict[key] = value
         for key, value in importFromBase_args.items():
             self.settings_dict[key] = value
-        with open(_path_ + "/settings.json", "w") as write_file:
+        with open(_path_ + "/user/settings.json", "w") as write_file:
             json.dump(self.settings_dict, write_file, indent=4)
         return True
     def ResetSettings(self):
-        with open(_path_ + "/settings.json", "w") as write_file:
+        with open(_path_ + "/user/settings.json", "w") as write_file:
             json.dump(ReadJSON("/res/settings.json"), write_file, indent=4)
         return True
 
